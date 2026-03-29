@@ -10,7 +10,7 @@ const server = createServer(
       "Connection": "keep-alive",
       "Cache-Control": "no-cache"
     });
-    res.end("Hello World. Create by Puxa");
+    res.end("Hello World. Create by Puxa. 2026.");
   }
 );
 
