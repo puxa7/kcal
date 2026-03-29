@@ -6,26 +6,7 @@
   <title>Kcal App</title>
   <style>
     body { font-family: sans-serif; padding: 30px; background: #f4f4f9; color: #333; }
-    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto; }
-    .input-group { margin-bottom: 15px; }
-    label { display: block; margin-bottom: 5px; font-weight: bold; }
-    input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-    button { width: 100%; padding: 12px; margin-top: 10px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; }
-    .btn-add { background: #4CAF50; color: white; }
-    .summary-card { background: #e3f2fd; padding: 15px; margin-top: 20px; border-radius: 6px; border-left: 5px solid #2196F3; }
-    table { width: 100%; border-collapse: collapse; margin-top: 25px; }
-    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-    th { background: #f8f9fa; }
-    #status { color: #d32f2f; margin: 15px 0; text-align: center; font-weight: bold; height: 20px; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h1>Tracker Kalorii 🔥</h1>
-    
-    <style>
-    body { font-family: sans-serif; padding: 30px; background: #f4f4f9; color: #333; }
-    .card { max-width: 600px; margin: 0 auto; }
+    .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); max-width: 600px; margin: 0 auto; }
     .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
     .tab { padding: 10px 20px; cursor: pointer; border: none; background: none; font-weight: bold; color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px; }
     .tab.active { color: #2196F3; border-bottom-color: #2196F3; }
@@ -45,11 +26,11 @@
 </head>
 <body>
   <div class="card">
-    <h1>Tracker Kcal & Waga 🔥</h1>
-    
+    <h1 style="text-align: center; margin-bottom: 25px; color: #333;">Health tracker</h1>
     <div class="tabs">
       <button class="tab active" onclick="switchTab('kcal')">Kalorie</button>
       <button class="tab" onclick="switchTab('weight')">Waga</button>
+      <button class="tab" onclick="switchTab('workout')">Trening</button>
     </div>
 
     <div id="status"></div>
@@ -57,9 +38,12 @@
     <!-- WIDOK KALORII -->
     <div id="kcalView" class="view active">
       <div class="input-group">
-        <label>Dodaj kalorie (kcal):</label>
+        <input type="hidden" id="kcalEditId">
+        <label>Data posiłku:</label>
+        <input type="datetime-local" id="kcalDateInput">
+        <label style="margin-top: 10px;">Dodaj kalorie (kcal):</label>
         <input type="number" id="kcalInput" value="0">
-        <button class="btn-save" onclick="saveData()">Zapisz posiłek</button>
+        <button id="kcalSaveBtn" class="btn-save" onclick="saveData()">Zapisz posiłek</button>
       </div>
 
       <div id="dailyKcalSummary" class="summary-card">
@@ -68,7 +52,7 @@
 
       <h3>Historia posiłków</h3>
       <table id="historyTable">
-        <thead><tr><th>Data</th><th>Kcal</th></tr></thead>
+        <thead><tr><th>Data</th><th>Kcal</th><th>Opcje</th></tr></thead>
         <tbody id="historyBody"></tbody>
       </table>
     </div>
@@ -92,25 +76,46 @@
         <thead><tr><th>Data</th><th>kg</th><th>Cel (Δ-0.1)</th><th>Opcje</th></tr></thead>
         <tbody id="weightBody"></tbody>
       </table>
+
+      <div style="margin-top: 30px; padding: 15px; background: #fffde7; border-radius: 6px; border: 1px solid #fff59d; font-size: 0.9em;">
+        <h4>⚙️ Ustawienia celu</h4>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <div>
+            <label>Waga start (kg):</label>
+            <input type="number" step="0.01" id="startWeightInput" style="width: 80px;">
+          </div>
+          <div>
+            <label>Data startu:</label>
+            <input type="date" id="startDateInput" style="width: 130px;">
+          </div>
+          <div>
+            <label>Cel spadek (kg):</label>
+            <input type="number" step="0.01" id="targetDeltaInput" style="width: 80px;">
+          </div>
+          <button onclick="saveSettings()" style="width: auto; margin-top: 24px; padding: 5px 15px; background: #fbc02d;">Zaktualizuj plan</button>
+        </div>
+      </div>
     </div>
 
-    <div style="margin-top: 30px; padding: 15px; background: #fffde7; border-radius: 6px; border: 1px solid #fff59d; font-size: 0.9em;">
-      <h4>⚙️ Ustawienia celu</h4>
-      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <div>
-          <label>Waga start (kg):</label>
-          <input type="number" step="0.01" id="startWeightInput" style="width: 80px;">
-        </div>
-        <div>
-          <label>Data startu:</label>
-          <input type="date" id="startDateInput" style="width: 130px;">
-        </div>
-        <div>
-          <label>Cel spadek (kg):</label>
-          <input type="number" step="0.01" id="targetDeltaInput" style="width: 80px;">
-        </div>
-        <button onclick="saveSettings()" style="width: auto; margin-top: 24px; padding: 5px 15px; background: #fbc02d;">Zaktualizuj plan</button>
+    <!-- WIDOK TRENINGU -->
+    <div id="workoutView" class="view">
+      <div class="input-group">
+        <label>Data treningu:</label>
+        <input type="datetime-local" id="workoutDateInput">
+        <label style="margin-top: 10px;">Opis treningu:</label>
+        <input type="text" id="workoutInput" placeholder="np. Bieganie 5km, Siłownia...">
+        <button class="btn-save" style="background: #9c27b0;" onclick="saveWorkout()">Zapisz trening</button>
       </div>
+
+      <div id="workoutGoalSummary" class="summary-card" style="background: #f3e5f5; border-left-color: #9c27b0;">
+        <strong>Cel treningowy (4/7 dni):</strong> <span id="workoutGoalStatus">Ładowanie...</span>
+      </div>
+
+      <h3>Historia treningów</h3>
+      <table id="workoutTable">
+        <thead><tr><th>Data</th><th>Opis</th><th>Opcje</th></tr></thead>
+        <tbody id="workoutBody"></tbody>
+      </table>
     </div>
 
   </div>
@@ -123,9 +128,12 @@
       if (tab === 'kcal') {
         document.querySelector('.tab:nth-child(1)').classList.add('active');
         document.getElementById('kcalView').classList.add('active');
-      } else {
+      } else if (tab === 'weight') {
         document.querySelector('.tab:nth-child(2)').classList.add('active');
         document.getElementById('weightView').classList.add('active');
+      } else {
+        document.querySelector('.tab:nth-child(3)').classList.add('active');
+        document.getElementById('workoutView').classList.add('active');
       }
       loadHistory();
     }
@@ -143,11 +151,59 @@
     document.getElementById('targetDeltaInput').value = localStorage.getItem('targetDelta') || 0.1;
     document.getElementById('weightDateInput').value = new Date().toISOString().split('T')[0];
 
+    function updateKcalDate() {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      document.getElementById('kcalDateInput').value = now.toISOString().slice(0, 16);
+      document.getElementById('workoutDateInput').value = now.toISOString().slice(0, 16);
+    }
+    updateKcalDate();
+
     async function saveData() {
       const kcal = document.getElementById('kcalInput').value;
-      const res = await fetch(`/api/add?kcal=${kcal}`);
+      const id = document.getElementById('kcalEditId').value;
+      const date = document.getElementById('kcalDateInput').value;
+      let url = `/api/add?kcal=${kcal}`;
+      if (id) url += `&id=${id}`;
+      if (date) url += `&date=${encodeURIComponent(date)}`;
+
+      const res = await fetch(url);
       document.getElementById('status').innerText = await res.text();
+      
       document.getElementById('kcalInput').value = 0;
+      document.getElementById('kcalEditId').value = '';
+      document.getElementById('kcalSaveBtn').innerText = 'Zapisz posiłek';
+      updateKcalDate();
+      
+      loadHistory();
+      setTimeout(() => document.getElementById('status').innerText = '', 3000);
+    }
+
+    function editKcal(id, amount, date) {
+      document.getElementById('kcalEditId').value = id;
+      document.getElementById('kcalInput').value = amount;
+      
+      // Format ISO date for datetime-local input
+      const d = new Date(date);
+      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+      document.getElementById('kcalDateInput').value = d.toISOString().slice(0, 16);
+      
+      document.getElementById('kcalSaveBtn').innerText = 'Aktualizuj posiłek';
+      document.getElementById('kcalInput').focus();
+    }
+
+    async function deleteKcal(id) {
+      if (!confirm('Czy na pewno chcesz usunąć ten wpis?')) return;
+      const res = await fetch(`/api/delete-calorie?id=${id}`);
+      document.getElementById('status').innerText = await res.text();
+      loadHistory();
+      setTimeout(() => document.getElementById('status').innerText = '', 3000);
+    }
+
+    async function deleteWorkout(id) {
+      if (!confirm('Czy na pewno chcesz usunąć ten trening?')) return;
+      const res = await fetch(`/api/delete-workout?id=${id}`);
+      document.getElementById('status').innerText = await res.text();
       loadHistory();
       setTimeout(() => document.getElementById('status').innerText = '', 3000);
     }
@@ -162,6 +218,20 @@
       setTimeout(() => document.getElementById('status').innerText = '', 3000);
     }
 
+    async function saveWorkout() {
+      const desc = document.getElementById('workoutInput').value;
+      const date = document.getElementById('workoutDateInput').value;
+      let url = `/api/workout?desc=${encodeURIComponent(desc)}`;
+      if (date) url += `&date=${encodeURIComponent(date)}`;
+
+      const res = await fetch(url);
+      document.getElementById('status').innerText = await res.text();
+      document.getElementById('workoutInput').value = '';
+      updateKcalDate();
+      loadHistory();
+      setTimeout(() => document.getElementById('status').innerText = '', 3000);
+    }
+
     function editWeight(date, weight) {
       document.getElementById('weightDateInput').value = date;
       document.getElementById('weightInput').value = weight;
@@ -171,11 +241,11 @@
     async function loadHistory() {
       try {
         const startW = parseFloat(localStorage.getItem('startWeight') || 85);
-        const startD = new Date(localStorage.getItem('startDate') || new Date());
+        const startDStr = localStorage.getItem('startDate');
+        const startD = startDStr ? new Date(startDStr) : new Date();
         const targetDelta = parseFloat(localStorage.getItem('targetDelta') || 0.1);
         const todayStr = new Date().toLocaleDateString();
 
-        // Kalorie
         const calRes = await fetch('/api/history/calories');
         const calories = await calRes.json();
         const body = document.getElementById('historyBody');
@@ -185,11 +255,17 @@
         calories.forEach(item => {
           const itemDate = new Date(item.date);
           if (itemDate.toLocaleDateString() === todayStr) todayKcal += (item.amount || 0);
-          body.innerHTML += `<tr><td>${itemDate.toLocaleString()}</td><td>${item.amount}</td></tr>`;
+          body.innerHTML += `<tr>
+            <td>${itemDate.toLocaleString()}</td>
+            <td>${item.amount}</td>
+            <td>
+              <button onclick="editKcal(${item.id}, ${item.amount}, '${item.date}')" style="margin:0; padding: 2px 8px; font-size: 0.8em; background: #9e9e9e; color: white; width: auto;">Edytuj</button>
+              <button onclick="deleteKcal(${item.id})" style="margin:0; padding: 2px 8px; font-size: 0.8em; background: #f44336; color: white; width: auto;">Usuń</button>
+            </td>
+          </tr>`;
         });
         document.getElementById('todayTotal').innerText = todayKcal;
 
-        // Waga
         const weightRes = await fetch('/api/history/weight');
         const weights = await weightRes.json();
         const wBody = document.getElementById('weightBody');
@@ -201,15 +277,50 @@
           const itemDate = new Date(item.day);
           const diffDays = Math.floor((itemDate.getTime() - startD.getTime()) / (1000 * 60 * 60 * 24));
           const targetWeight = (startW - (diffDays * targetDelta)).toFixed(2);
-          const statusColor = item.weight <= targetWeight ? '#2e7d32' : '#c62828';
+          const currentWeightVal = parseFloat(item.weight);
+          const statusColor = currentWeightVal <= parseFloat(targetWeight) ? '#2e7d32' : '#c62828';
 
           wBody.innerHTML += `<tr>
             <td>${new Date(item.day).toLocaleDateString()}</td>
-            <td style="font-weight: bold; color: ${statusColor}">${item.weight.toFixed(2)}</td>
+            <td style="font-weight: bold; color: ${statusColor}">${currentWeightVal.toFixed(2)}</td>
             <td style="color: #666; font-style: italic;">${targetWeight} kg</td>
-            <td><button onclick="editWeight('${item.day}', ${item.weight})" style="margin:0; padding: 2px 8px; font-size: 0.8em; background: #9e9e9e; color: white; width: auto;">Edytuj</button></td>
+            <td><button onclick="editWeight('${item.day}', ${currentWeightVal})" style="margin:0; padding: 2px 8px; font-size: 0.8em; background: #9e9e9e; color: white; width: auto;">Edytuj</button></td>
           </tr>`;
         });
+
+        // Treningi
+        const woRes = await fetch('/api/history/workouts');
+        const workouts = await woRes.json();
+        const woBody = document.getElementById('workoutBody');
+        woBody.innerHTML = '';
+        workouts.forEach(item => {
+          woBody.innerHTML += `<tr>
+            <td>${new Date(item.date).toLocaleString()}</td>
+            <td>${item.description}</td>
+            <td><button onclick="deleteWorkout(${item.id})" style="margin:0; padding: 2px 8px; font-size: 0.8em; background: #f44336; color: white; width: auto;">Usuń</button></td>
+          </tr>`;
+        });
+
+        // Obliczanie celu treningowego (4 razy w ciągu ostatnich 7 dni)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        
+        // Zliczamy unikalne dni z treningiem w ostatnich 7 dniach
+        const recentWorkoutDays = new Set();
+        workouts.forEach(item => {
+          const itemDate = new Date(item.date);
+          if (itemDate >= sevenDaysAgo) {
+            recentWorkoutDays.add(itemDate.toLocaleDateString());
+          }
+        });
+
+        const workoutCount = recentWorkoutDays.size;
+        const goalStatus = document.getElementById('workoutGoalStatus');
+        if (workoutCount >= 4) {
+          goalStatus.innerHTML = `<span style="color: #2e7d32">Brawo! Trenowałeś ${workoutCount} dni w ciągu ostatniego tygodnia. Tak trzymaj! 🔥</span>`;
+        } else {
+          goalStatus.innerHTML = `<span style="color: #c62828">Mało! Trenowałeś tylko ${workoutCount} dni w ciągu ostatniego tygodnia. Cel to min. 4 dni.</span>`;
+        }
       } catch (err) { console.error('Błąd:', err); }
     }
     window.onload = loadHistory;

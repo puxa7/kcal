@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, timestamp, doublePrecision, date } from 'drizzle-orm/pg-core';
+import { pgTable, serial, integer, timestamp, doublePrecision, date, text } from 'drizzle-orm/pg-core';
 
 export const calories = pgTable('calories', {
   id: serial('id').primaryKey(),
@@ -10,5 +10,11 @@ export const metrics = pgTable('metrics', {
   id: serial('id').primaryKey(),
   weight: doublePrecision('weight').notNull(),
   day: date('day').defaultNow().notNull().unique(),
+  date: timestamp('date').defaultNow().notNull(),
+});
+
+export const workouts = pgTable('workouts', {
+  id: serial('id').primaryKey(),
+  description: text('description').notNull(),
   date: timestamp('date').defaultNow().notNull(),
 });

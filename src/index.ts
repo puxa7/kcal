@@ -1,7 +1,7 @@
 import { createServer, IncomingMessage, ServerResponse } from "http";
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import { calories, metrics } from './db/schema';
+import { calories, metrics, workouts } from './db/schema';
 import { envOrThrow } from './utils';
 import { desc, sql } from 'drizzle-orm';
 import { readFile } from "fs/promises";
@@ -20,6 +20,21 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
   const url = new URL(req.url || '', `http://localhost:${PORT}`);
 
   // --- API BACKENDOWE ---
+
+  // Pobieranie treningów
+  if (url.pathname === '/api/history/workouts') {
+    try {
+      const workoutData = await db.select().from(workouts).orderBy(desc(workouts.date));
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(workoutData));
+      return;
+    } catch (err) {
+      console.error(err);
+      res.writeHead(500);
+      res.end("Błąd bazy danych (treningi)");
+      return;
+    }
+  }
 
   // Pobieranie historii kalorii
   if (url.pathname === '/api/history/calories') {
@@ -54,15 +69,92 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
   // Dodawanie kalorii
   if (url.pathname === '/api/add') {
     const kcal = parseInt(url.searchParams.get('kcal') || '0');
+    const id = url.searchParams.get('id');
+    const customDate = url.searchParams.get('date');
+
     try {
-      await db.insert(calories).values({ amount: kcal });
+      if (id) {
+        // Jeśli jest ID, to edytujemy
+        const updateData: any = { amount: kcal };
+        if (customDate) updateData.date = new Date(customDate);
+        
+        await db.update(calories).set(updateData).where(sql`${calories.id} = ${parseInt(id)}`);
+      } else {
+        // Jeśli nie ma ID, to dodajemy nowy
+        const insertData: any = { amount: kcal };
+        if (customDate) insertData.date = new Date(customDate);
+        
+        await db.insert(calories).values(insertData);
+      }
       res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
-      res.end(`Zapisano kalorie!`);
+      res.end(id ? "Zaktualizowano kalorie!" : "Zapisano kalorie!");
       return;
     } catch (err) {
       console.error(err);
       res.writeHead(500);
       res.end("Błąd zapisu kalorii");
+      return;
+    }
+  }
+
+  // Usuwanie kalorii
+  if (url.pathname === '/api/delete-calorie') {
+    const id = url.searchParams.get('id');
+    if (!id) {
+      res.writeHead(400);
+      res.end("Brak ID do usunięcia");
+      return;
+    }
+    try {
+      await db.delete(calories).where(sql`${calories.id} = ${parseInt(id)}`);
+      res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
+      res.end("Usunięto wpis!");
+      return;
+    } catch (err) {
+      console.error(err);
+      res.writeHead(500);
+      res.end("Błąd podczas usuwania");
+      return;
+    }
+  }
+
+  // Usuwanie treningu
+  if (url.pathname === '/api/delete-workout') {
+    const id = url.searchParams.get('id');
+    if (!id) {
+      res.writeHead(400);
+      res.end("Brak ID do usunięcia");
+      return;
+    }
+    try {
+      await db.delete(workouts).where(sql`${workouts.id} = ${parseInt(id)}`);
+      res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
+      res.end("Usunięto trening!");
+      return;
+    } catch (err) {
+      console.error(err);
+      res.writeHead(500);
+      res.end("Błąd podczas usuwania treningu");
+      return;
+    }
+  }
+
+  // Dodawanie treningu
+  if (url.pathname === '/api/workout') {
+    const descStr = url.searchParams.get('desc') || '';
+    const customDate = url.searchParams.get('date');
+    try {
+      const insertData: any = { description: descStr };
+      if (customDate) insertData.date = new Date(customDate);
+      
+      await db.insert(workouts).values(insertData);
+      res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
+      res.end(`Zapisano trening!`);
+      return;
+    } catch (err) {
+      console.error(err);
+      res.writeHead(500);
+      res.end("Błąd zapisu treningu");
       return;
     }
   }
