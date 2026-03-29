@@ -22,6 +22,22 @@
     th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
     th { background: #f8f9fa; }
     #status { color: #d32f2f; margin: 10px 0; text-align: center; font-weight: bold; height: 15px; font-size: 0.9em; }
+    
+    /* Mobilne optymalizacje */
+    .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    @media (max-width: 600px) {
+      body { padding: 10px; margin: 0; }
+      .card { padding: 15px; border-radius: 6px; box-shadow: none; border: 1px solid #ddd; }
+      .tabs { display: flex; flex-wrap: wrap; }
+      .tab { flex: 1; padding: 12px 5px; font-size: 0.9em; text-align: center; }
+      th, td { padding: 8px 4px; font-size: 0.85em; }
+      h1 { font-size: 1.5em; margin-bottom: 15px; }
+      button { padding: 14px; font-size: 1.05em; } 
+      .summary-card { padding: 10px; font-size: 0.9em; }
+      .settings-grid { flex-direction: column !important; }
+      .settings-grid > div, .settings-grid > button { width: 100% !important; margin-top: 5px !important; }
+      .settings-grid input { width: 100% !important; }
+    }
   </style>
 </head>
 <body>
@@ -51,10 +67,12 @@
       </div>
 
       <h3>Historia posiłków</h3>
-      <table id="historyTable">
-        <thead><tr><th>Data</th><th>Kcal</th><th>Opcje</th></tr></thead>
-        <tbody id="historyBody"></tbody>
-      </table>
+      <div class="table-responsive">
+        <table id="historyTable">
+          <thead><tr><th>Data</th><th>Kcal</th><th>Opcje</th></tr></thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
     </div>
 
     <!-- WIDOK WAGI -->
@@ -72,14 +90,16 @@
       </div>
 
       <h3>Historia wagi (ostatnie 20)</h3>
-      <table id="weightTable">
-        <thead><tr><th>Data</th><th>kg</th><th>Cel (Δ-0.1)</th><th>Opcje</th></tr></thead>
-        <tbody id="weightBody"></tbody>
-      </table>
+      <div class="table-responsive">
+        <table id="weightTable">
+          <thead><tr><th>Data</th><th>kg</th><th>Cel (Δ-0.1)</th><th>Opcje</th></tr></thead>
+          <tbody id="weightBody"></tbody>
+        </table>
+      </div>
 
       <div style="margin-top: 30px; padding: 15px; background: #fffde7; border-radius: 6px; border: 1px solid #fff59d; font-size: 0.9em;">
         <h4>⚙️ Ustawienia celu</h4>
-        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <div class="settings-grid" style="display: flex; gap: 10px; flex-wrap: wrap;">
           <div>
             <label>Waga start (kg):</label>
             <input type="number" step="0.01" id="startWeightInput" style="width: 80px;">
@@ -112,10 +132,12 @@
       </div>
 
       <h3>Historia treningów</h3>
-      <table id="workoutTable">
-        <thead><tr><th>Data</th><th>Opis</th><th>Opcje</th></tr></thead>
-        <tbody id="workoutBody"></tbody>
-      </table>
+      <div class="table-responsive">
+        <table id="workoutTable">
+          <thead><tr><th>Data</th><th>Opis</th><th>Opcje</th></tr></thead>
+          <tbody id="workoutBody"></tbody>
+        </table>
+      </div>
     </div>
 
   </div>
