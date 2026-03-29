@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kcal App</title>
+  <style>
+    body { font-family: sans-serif; padding: 30px; background: #f4f4f9; color: #333; }
+    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto; }
+    .input-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; }
+    input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+    button { width: 100%; padding: 12px; margin-top: 10px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; }
+    .btn-add { background: #4CAF50; color: white; }
+    .summary-card { background: #e3f2fd; padding: 15px; margin-top: 20px; border-radius: 6px; border-left: 5px solid #2196F3; }
+    table { width: 100%; border-collapse: collapse; margin-top: 25px; }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    th { background: #f8f9fa; }
+    #status { color: #d32f2f; margin: 15px 0; text-align: center; font-weight: bold; height: 20px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Tracker Kalorii 🔥</h1>
+    
+    <style>
+    body { font-family: sans-serif; padding: 30px; background: #f4f4f9; color: #333; }
+    .card { max-width: 600px; margin: 0 auto; }
+    .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
+    .tab { padding: 10px 20px; cursor: pointer; border: none; background: none; font-weight: bold; color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+    .tab.active { color: #2196F3; border-bottom-color: #2196F3; }
+    .view { display: none; }
+    .view.active { display: block; }
+    .input-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; }
+    input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+    button { width: 100%; padding: 12px; margin-top: 10px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; }
+    .btn-save { background: #4CAF50; color: white; }
+    .summary-card { background: #e3f2fd; padding: 15px; margin: 20px 0; border-radius: 6px; border-left: 5px solid #2196F3; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    th { background: #f8f9fa; }
+    #status { color: #d32f2f; margin: 10px 0; text-align: center; font-weight: bold; height: 15px; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Tracker Kcal & Waga 🔥</h1>
+    
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('kcal')">Kalorie</button>
+      <button class="tab" onclick="switchTab('weight')">Waga</button>
+    </div>
+
+    <div id="status"></div>
+
+    <!-- WIDOK KALORII -->
+    <div id="kcalView" class="view active">
+      <div class="input-group">
+        <label>Dodaj kalorie (kcal):</label>
+        <input type="number" id="kcalInput" value="0">
+        <button class="btn-save" onclick="saveData()">Zapisz posiłek</button>
+      </div>
+
+      <div id="dailyKcalSummary" class="summary-card">
+        <strong>Dzisiaj łącznie:</strong> <span id="todayTotal">0</span> kcal
+      </div>
+
+      <h3>Historia posiłków</h3>
+      <table id="historyTable">
+        <thead><tr><th>Data</th><th>Kcal</th></tr></thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+    </div>
+
+    <!-- WIDOK WAGI -->
+    <div id="weightView" class="view">
+      <div class="input-group">
+        <label>Data pomiaru:</label>
+        <input type="date" id="weightDateInput">
+        <label style="margin-top: 10px;">Waga (kg):</label>
+        <input type="number" step="0.1" id="weightInput" placeholder="0.0">
+        <button class="btn-save" style="background: #2196F3;" onclick="saveWeight()">Zapisz / Aktualizuj wagę</button>
+      </div>
+
+      <div id="dailyWeightSummary" class="summary-card">
+        <strong>Ostatni pomiar:</strong> <span id="lastWeight">--</span> kg
+      </div>
+
+      <h3>Historia wagi (ostatnie 20)</h3>
+      <table id="weightTable">
+        <thead><tr><th>Data</th><th>kg</th><th>Cel (Δ-0.1)</th><th>Opcje</th></tr></thead>
+        <tbody id="weightBody"></tbody>
+      </table>
+    </div>
+
+    <div style="margin-top: 30px; padding: 15px; background: #fffde7; border-radius: 6px; border: 1px solid #fff59d; font-size: 0.9em;">
+      <h4>⚙️ Ustawienia celu</h4>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <div>
+          <label>Waga start (kg):</label>
+          <input type="number" step="0.01" id="startWeightInput" style="width: 80px;">
+        </div>
+        <div>
+          <label>Data startu:</label>
+          <input type="date" id="startDateInput" style="width: 130px;">
+        </div>
+        <div>
+          <label>Cel spadek (kg):</label>
+          <input type="number" step="0.01" id="targetDeltaInput" style="width: 80px;">
+        </div>
+        <button onclick="saveSettings()" style="width: auto; margin-top: 24px; padding: 5px 15px; background: #fbc02d;">Zaktualizuj plan</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      
+      if (tab === 'kcal') {
+        document.querySelector('.tab:nth-child(1)').classList.add('active');
+        document.getElementById('kcalView').classList.add('active');
+      } else {
+        document.querySelector('.tab:nth-child(2)').classList.add('active');
+        document.getElementById('weightView').classList.add('active');
+      }
+      loadHistory();
+    }
+
+    function saveSettings() {
+      localStorage.setItem('startWeight', document.getElementById('startWeightInput').value);
+      localStorage.setItem('startDate', document.getElementById('startDateInput').value);
+      localStorage.setItem('targetDelta', document.getElementById('targetDeltaInput').value);
+      loadHistory();
+    }
+
+    // Init settings
+    document.getElementById('startWeightInput').value = localStorage.getItem('startWeight') || 85;
+    document.getElementById('startDateInput').value = localStorage.getItem('startDate') || new Date().toISOString().split('T')[0];
+    document.getElementById('targetDeltaInput').value = localStorage.getItem('targetDelta') || 0.1;
+    document.getElementById('weightDateInput').value = new Date().toISOString().split('T')[0];
+
+    async function saveData() {
+      const kcal = document.getElementById('kcalInput').value;
+      const res = await fetch(`/api/add?kcal=${kcal}`);
+      document.getElementById('status').innerText = await res.text();
+      document.getElementById('kcalInput').value = 0;
+      loadHistory();
+      setTimeout(() => document.getElementById('status').innerText = '', 3000);
+    }
+
+    async function saveWeight() {
+      const weight = document.getElementById('weightInput').value;
+      const date = document.getElementById('weightDateInput').value;
+      const res = await fetch(`/api/weight?value=${weight}&date=${date}`);
+      document.getElementById('status').innerText = await res.text();
+      document.getElementById('weightInput').value = '';
+      loadHistory();
+      setTimeout(() => document.getElementById('status').innerText = '', 3000);
+    }
+
+    function editWeight(date, weight) {
+      document.getElementById('weightDateInput').value = date;
+      document.getElementById('weightInput').value = weight;
+      document.getElementById('weightInput').focus();
+    }
+
+    async function loadHistory() {
+      try {
+        const startW = parseFloat(localStorage.getItem('startWeight') || 85);
+        const startD = new Date(localStorage.getItem('startDate') || new Date());
+        const targetDelta = parseFloat(localStorage.getItem('targetDelta') || 0.1);
+        const todayStr = new Date().toLocaleDateString();
+
+        // Kalorie
+        const calRes = await fetch('/api/history/calories');
+        const calories = await calRes.json();
+        const body = document.getElementById('historyBody');
+        body.innerHTML = '';
+        let todayKcal = 0;
+
+        calories.forEach(item => {
+          const itemDate = new Date(item.date);
+          if (itemDate.toLocaleDateString() === todayStr) todayKcal += (item.amount || 0);
+          body.innerHTML += `<tr><td>${itemDate.toLocaleString()}</td><td>${item.amount}</td></tr>`;
+        });
+        document.getElementById('todayTotal').innerText = todayKcal;
+
+        // Waga
+        const weightRes = await fetch('/api/history/weight');
+        const weights = await weightRes.json();
+        const wBody = document.getElementById('weightBody');
+        wBody.innerHTML = '';
+        
+        if (weights.length > 0) document.getElementById('lastWeight').innerText = weights[0].weight;
+
+        weights.forEach(item => {
+          const itemDate = new Date(item.day);
+          const diffDays = Math.floor((itemDate.getTime() - startD.getTime()) / (1000 * 60 * 60 * 24));
+          const targetWeight = (startW - (diffDays * targetDelta)).toFixed(2);
+          const statusColor = item.weight <= targetWeight ? '#2e7d32' : '#c62828';
+
+          wBody.innerHTML += `<tr>
+            <td>${new Date(item.day).toLocaleDateString()}</td>
+            <td style="font-weight: bold; color: ${statusColor}">${item.weight.toFixed(2)}</td>
+            <td style="color: #666; font-style: italic;">${targetWeight} kg</td>
+            <td><button onclick="editWeight('${item.day}', ${item.weight})" style="margin:0; padding: 2px 8px; font-size: 0.8em; background: #9e9e9e; color: white; width: auto;">Edytuj</button></td>
+          </tr>`;
+        });
+      } catch (err) { console.error('Błąd:', err); }
+    }
+    window.onload = loadHistory;
+  </script>
+</body>
+</html>
